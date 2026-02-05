@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["yarn", "dev"]  # Use yarn dev for development with hot reload
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_URI=${MONGO_URI}
+      - JWT_SECRET=${JWT_SECRET}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - PORT=${PORT}
+    depends_on:
+      - mongo
+    volumes:
+      - .:/app  # Mounts code for hot reload
+    networks:
+      - app-network
+
+  mongo:
+    image: mongo:latest
+    container_name: mongo-development
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data-development:/data/db
+    networks:
+      - app-network
+
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-express-development
+    ports:
+      - "8081:8081"
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=${ME_CONFIG_MONGODB_SERVER}
+      - ME_CONFIG_MONGODB_PORT=${ME_CONFIG_MONGODB_PORT}
+      - ME_CONFIG_BASICAUTH_USERNAME=${ME_CONFIG_BASICAUTH_USERNAME}
+      - ME_CONFIG_BASICAUTH_PASSWORD=${ME_CONFIG_BASICAUTH_PASSWORD}
+      - ME_CONFIG_MONGODB_ENABLE_ADMIN=${ME_CONFIG_MONGODB_ENABLE_ADMIN}
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mongo-data-development:

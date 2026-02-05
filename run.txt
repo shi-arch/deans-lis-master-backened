@@ -1,0 +1,17 @@
+Development
+
+Up: docker compose -f docker-compose.development.yml --env-file .env.development up -d --build
+Down: docker compose -f docker-compose.development.yml down 
+
+Down: docker compose -f docker-compose.development.yml --env-file .env.development down 
+
+
+Staging
+
+Up: docker compose -f docker-compose.staging.yml --env-file .env.staging up -d --build
+Down: docker compose -f docker-compose.staging.yml down 
+
+Production
+
+Up: docker compose -f docker-compose.production.yml --env-file .env.production up -d --build
+Down: docker compose -f docker-compose.production.yml down 

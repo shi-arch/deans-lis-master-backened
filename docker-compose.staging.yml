@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["yarn", "start"]  # Use yarn start for staging
+    ports:
+      - "5001:5000"  # Different host port to avoid dev conflict
+    environment:
+      - MONGO_URI=${MONGO_URI}
+      - JWT_SECRET=${JWT_SECRET}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - PORT=${PORT}
+      - NODE_ENV=staging
+    depends_on:
+      - mongo
+    # No code volume: uses built image
+    networks:
+      - app-network
+
+  mongo:
+    image: mongo:latest
+    container_name: mongo-staging
+    ports:
+      - "27018:27017"  # Different host port
+    volumes:
+      - mongo-data-staging:/data/db
+    networks:
+      - app-network
+
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-express-staging
+    ports:
+      - "8082:8081"  # Different host port
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=${ME_CONFIG_MONGODB_SERVER}
+      - ME_CONFIG_MONGODB_PORT=${ME_CONFIG_MONGODB_PORT}
+      - ME_CONFIG_BASICAUTH_USERNAME=${ME_CONFIG_BASICAUTH_USERNAME}
+      - ME_CONFIG_BASICAUTH_PASSWORD=${ME_CONFIG_BASICAUTH_PASSWORD}
+      - ME_CONFIG_MONGODB_ENABLE_ADMIN=${ME_CONFIG_MONGODB_ENABLE_ADMIN}
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mongo-data-staging:
