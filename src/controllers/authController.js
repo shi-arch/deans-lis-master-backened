@@ -225,6 +225,7 @@ exports.signin = [ async (req, res) => {
   
   try {
     const { email, password, rememberMe } = req.body;
+    console.log(req.body,'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
     console.log('Signin attempt:', { email, rememberMe });
 
     // 1. Validate inputs
