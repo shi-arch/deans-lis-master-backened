@@ -12,7 +12,9 @@ const authMiddlewareBuyer = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const buyer = await Buyer.findById(decoded.userId).select('_id');
+    const buyer = await Buyer.findById(decoded.userId);
+
+    //const buyer = await Buyer.findById(decoded.userId).select('_id');
     if (!buyer) {
       return res.status(401).json({ success: false, message: 'User not found, authorization denied.' });
     }

@@ -9,7 +9,7 @@ const mongoose = require('mongoose');
   }, { _id: false, timestamps: true });
 
   const CategorySchema = new Schema({
-    _id: Schema.Types.ObjectId,
+    //_id: Schema.Types.ObjectId,
     category_id: { type: Number, required: true, unique: true }, // Numeric ID for main category
     name: { type: String, required: true, unique: true }, // e.g., "String"
     subcategories: [SubCategorySchema], // Array of subcategory objects

@@ -7,6 +7,7 @@ const {
   BADGES,
   BADGE_LABELS,
   BADGE_COLORS,
+  Categories,
 } = require('../utils/constants');
 
 // Certificate subdocument schema
@@ -100,6 +101,7 @@ const SellerSchema = new Schema(
     // },
     services: {
       type: [Number], // Stores numeric ids from Category (e.g., [2, 3] for "Guitar" and "Acoustic Guitar")
+      enum: Categories.map((lang) => lang.id),
       required: true,
     },
     languages: {

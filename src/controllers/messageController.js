@@ -123,6 +123,9 @@ const sendMessage = async (req, res) => {
 const getMessages = async (req, res) => {
   try {
     const { id: userToChatIdStr } = req.params;
+    if (userToChatIdStr == 'conversations') {
+      return res.status(400).json({ error: 'Missing userTosssssChatId parameter' });
+    }
     const senderIdStr = req.user.userId;
     const senderRole = req.user.role;
 

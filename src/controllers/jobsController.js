@@ -629,6 +629,7 @@ const {
   GENDERS,
   STATES,
 } = require('../utils/constants');
+const Order = require('../models/models_backup/Order');
 
 
 exports.getById = async (req, res) => {
@@ -729,6 +730,87 @@ exports.getById = async (req, res) => {
   }
 };
 
+exports.createOrder = async (req, res) => {
+  try {
+    const buyerId = req.user.userId; // From authMiddlewareBuyer
+    const {jobId, applicationId, sellerId, amount, paymentStatus, date, time, location, coordinates, status} = req.body
+    if (!sellerId || !amount || !date || !time || !location || !coordinates || !status) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields: jobId, applicationId, buyerId, sellerId, amount',
+      });
+    }
+     const validObjectId = (id) =>
+      id && mongoose.Types.ObjectId.isValid(id)
+        ? new mongoose.Types.ObjectId(id)
+        : undefined;
+    const newOrder = await Order.create({
+      orderId: Math.random().toString(36).substr(2, 9), // Generate a random order ID
+      jobId: validObjectId(jobId) || "",
+      applicationId: validObjectId(applicationId) || "",
+      buyerId: new mongoose.Types.ObjectId(buyerId),
+      sellerId: new mongoose.Types.ObjectId(sellerId),
+      payment: {amount, status: paymentStatus || "Pending"},
+      schedule: {
+        date: new Date(date),
+        time: new Date(time),
+        location: location || "Bangalore, MG Road",
+        coordinates: coordinates
+      },
+      status: status,
+      timeRemaining: "2 days"
+    });
+    newOrder.save()
+    res.status(201).json({
+      success: true,
+      orderId: newOrder._id,
+      message: 'Order created successfully',
+    });
+  } catch (error) {
+    console.error('Error creating order:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while creating order',
+      error: error.message,
+    });
+  }
+};
+
+exports.updateOrder = async (req, res) => {
+  try {
+    const {updateData, orderId} = req.body;
+    const updatedOrder = await Order.findOneAndUpdate({ _id: orderId }, {...updateData}, { new: true });
+    if (!updatedOrder) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+    res.status(200).json({ success: true, data: updatedOrder });
+  } catch (error) {
+    console.error('Error updating order:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while updating order',
+      error: error.message,
+    });
+  }
+};
+
+exports.getOrdersForBuyer = async (req, res) => {
+  try {
+    const buyerId = req.user.userId; // From authMiddlewareBuyer    
+    const orders = await Order.find({ buyerId }).populate('jobId applicationId sellerId');
+    res.status(200).json({
+      success: true,
+      data: orders,
+    });
+  } catch (error) {
+    console.error('Error fetching orders for buyer:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while fetching orders for buyer',
+      error: error.message,
+    });
+  }
+};
 
 // Get jobs for the authenticated buyer with pagination and status filter
 // exports.getMyJobs = async (req, res) => {

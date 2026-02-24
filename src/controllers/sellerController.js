@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 // Fix the import path to match the actual filename case
 const Seller = require('../models/Seller');
 const Category = require('../models/category');
+const upload = require('../middleware/multer');
 const {
   LANGUAGES,
   GENRES,
@@ -62,7 +63,6 @@ exports.signup = async (req, res) => {
     for (let key in sanitized) {
       if (key !== 'gender') sanitized[key] = validator.escape(sanitized[key]);
     }
-
     // Validate required fields
     if (
       !sanitized.first_name ||
@@ -192,6 +192,59 @@ exports.signup = async (req, res) => {
     console.error('Seller signup error:', error);
     res.status(500).json({ message: 'Server error.', error: error.message });
   }
+};
+
+exports.updateSeller = async (req, res) => { 
+  try {
+    const seller = await Seller.findOne({ email: req.body.email });
+    if (!seller) {
+      return res.status(404).json({ message: 'Seller not found.' });
+    }
+    const updatedSeller = await Seller.findByIdAndUpdate(seller._id, req.body, { new: true });
+    res.status(200).json({ message: 'Seller updated successfully.', seller: updatedSeller });
+  } catch (error) {
+    console.error('Error updating seller:', error);
+    res.status(500).json({ message: 'Server error.', error: error.message });
+  }
+}
+
+
+exports.sellerImageUpload = (req, res) => {
+  upload.single('image')(req, res, async (err) => {
+    try {
+      // Multer error handling
+      if (err) {
+        return res.status(400).json({ message: err.message });
+      }
+
+      const { email } = req.body;
+
+      if (!email) {
+        return res.status(400).json({ message: 'Email is required' });
+      }
+
+      const user = await Seller.findOne({ email });
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ message: 'No image file provided' });
+      }
+      user.image = `/uploads/${req.file.filename}`;
+      const updateUser = await Seller.findByIdAndUpdate(user._id, { image: user.image }, { new: true });
+      //await user.save();
+
+      return res.status(200).json({
+        message: 'Image uploaded successfully',
+        image: updateUser.image,
+      });
+
+    } catch (error) {
+      console.error('Upload error:', error);
+      return res.status(500).json({ message: 'Server error' });
+    }
+  });
 };
 
 
@@ -393,26 +446,7 @@ exports.getSellers = async (req, res) => {
     const availabilityDate = req.query.availability_date || '';
     const zipCode = req.query.zip_code || '';
     const range = parseInt(req.query.range) || 0;
-    const buyerId = req.user ? req.user : null; // Get buyer ID from authMiddleware
-
-    // console.log('Query params:', {
-    //   page,
-    //   limit,
-    //   searchQuery,
-    //   category,
-    //   section,
-    //   subcategories,
-    //   priceRange,
-    //   genres,
-    //   languages,
-    //   gender,
-    //   badge,
-    //   availabilityDate,
-    //   zipCode,
-    //   range,
-    // });
-
-    // Fetch all categories and subcategories
+    const buyerId = req.user ? req.user : null; 
     const categories = await Category.find();
     const subcategoryMap = categories.reduce((acc, cat) => {
       cat.subcategories.forEach(sub => {
@@ -426,7 +460,7 @@ exports.getSellers = async (req, res) => {
     // console.log('Subcategory map:', subcategoryMap);
 
     // Fetch buyer's savedTalents once for performance
-    const buyer = buyerId ? await Buyer.findById(buyerId).select('savedTalents') : null;
+    const buyer = buyerId ? await buyer.findById(buyerId).select('savedTalents') : null;
     const savedTalents = buyer ? buyer.savedTalents.map(id => id.toString()) : [];
 
     // Build search filter

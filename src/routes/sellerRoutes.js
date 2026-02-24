@@ -8,6 +8,7 @@ const authMiddleware = require('../middleware/authMiddlewareSeller'); // Middlew
 const authMiddlewareBuyer = require('../middleware/authMiddlewareBuyer'); // Middleware to authenticate buyer requests
 const multer = require('multer'); // Middleware for handling file uploads
 const path = require('path'); // For handling file paths
+const { Category } = require('../models');
 const fs = require('fs').promises; // For async file system operations
 
 // Setup uploads directory for storing uploaded files (images, videos, audio)
@@ -92,11 +93,19 @@ const handleMulterErrors = (err, req, res, next) => {
 // POST route to sign up a new seller
 router.post('/signup', sellerController.signup);
 
+router.post('/seller-image-upload', sellerController.sellerImageUpload);
+
+router.post('/update-seller', authMiddlewareBuyer, sellerController.updateSeller);
+
 // POST route to sign in a seller
 router.post('/signin', sellerController.signin);
 
 // GET route to retrieve saved talents for a buyer (requires buyer authentication)
 router.get('/saved', authMiddlewareBuyer, userActionsController.getSavedTalents);
+
+router.post('/create-categories', categoryController.createCategory);
+router.post('/update-category', categoryController.updateCategory);
+
 
 // GET route to retrieve all subcategories
 router.get('/categories/subcategories', categoryController.getSubcategories);

@@ -19,7 +19,10 @@ const LANGUAGES = [
   // { id: 15, name: 'Polish' },
   // { id: 16, name: 'Swedish' },
 ];
-
+const Categories = [
+  { id: 1, name: 'Musician' },
+  { id: 2, name: 'Singer' }
+];
 const GENRES = [
   { id: 1, name: 'Jazz' },
   { id: 2, name: 'Country' },
@@ -135,4 +138,5 @@ module.exports = {
   getBadgeColorById,
   getStateNameById,   
   getStateIdByName,
+  Categories,
 };

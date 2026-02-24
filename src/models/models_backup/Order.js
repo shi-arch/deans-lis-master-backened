@@ -8,14 +8,16 @@ const orderSchema = new Schema({
     unique: true
   },
   jobId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Job',
-    required: true
+    // type: Schema.Types.ObjectId,
+    // ref: 'Job',
+    // //required: true
+    type: String
   },
   applicationId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Application',
-    required: true
+    // type: Schema.Types.ObjectId,
+    // ref: 'Application',
+    // //required: true
+    type: String
   },
   buyerId: {
     type: Schema.Types.ObjectId,
@@ -36,6 +38,15 @@ const orderSchema = new Schema({
       type: String,
       enum: ['Pending', 'Escrow', 'Released', 'Refunded'],
       default: 'Pending'
+    },
+    escrowedAt: {
+      type: Date
+    },
+    releasedAt: {
+      type: Date
+    },
+    refundedAt: {
+      type: Date
     }
   },
   schedule: {

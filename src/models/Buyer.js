@@ -29,6 +29,7 @@ const userSchema = new mongoose.Schema(
     firstName: { type: String, required: true, minlength: 2 },
     lastName: { type: String, minlength: 2, default: '' },
     username: { type: String, required: true, minlength: 3, unique: true },
+    image: { type: String, default: '' },
     email: { 
       type: String, 
       required: true, 

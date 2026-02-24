@@ -42,8 +42,9 @@ const authMiddleware = async (req, res, next) => {
 };
 
 // Routes
-router.get("/:id", authMiddleware, getMessages);
-router.post("/send/:id", authMiddleware, upload.single('file'), sendMessage);
 router.get("/conversations", authMiddleware, getRecentConversations);  // New route for recent chats
+router.post("/send/:id", authMiddleware, upload.single('file'), sendMessage);
+router.get("/:id", authMiddleware, getMessages);
+
 
 module.exports = router;

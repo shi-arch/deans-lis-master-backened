@@ -8,8 +8,11 @@ const logger = require('../middleware/logger');
 
 router.post('/signup', authController.signup);
 router.post('/verify-otp', authController.verifyOtp);
+router.post('/buyer-image-upload', authController.buyerImageUpload);
 router.post('/signin', authController.signin);
 router.get('/validate-token', authController.validateToken);
+router.get('/profile', authController.getProfile);
+router.post('/update-profile', authController.updateProfile);
 router.post('/google', authController.googleAuth); // New Google Auth route
 router.post('/logout', authMiddlewareBuyer, authController.logout);
 

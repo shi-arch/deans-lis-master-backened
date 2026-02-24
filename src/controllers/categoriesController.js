@@ -60,3 +60,39 @@ exports.getCategoriesWithSubcategories = async (req, res) => {
     });
   }
 };
+
+exports.createCategory = async (req, res) => {
+  try {
+    const { name, subcategories, category_id } = req.body;
+    const category = await Category.create({   // Required because you defined _id manually
+    category_id: category_id, name, subcategories
+});
+    res.status(201).json({ success: true, data: category });
+  } catch (error) {
+    console.error('Error creating category:', error);
+    res.status(500).json({ success: false, message: 'Error creating category', error: error.message });
+  }
+};
+
+exports.updateCategory = async (req, res) => {
+  try {
+    const { category_id, subcategories } = req.body;
+    const category = await Category.findOneAndUpdate(
+      { category_id },
+      {
+        $set: {
+          subcategories: subcategories
+        }
+      },
+      { new: true, runValidators: true }
+    );
+    if (!category) {
+      return res.status(404).json({ success: false, message: 'Category not found' });
+    }
+    
+    res.status(200).json({ success: true, data: category });
+  } catch (error) {
+    console.error('Error updating category:', error);
+    res.status(500).json({ success: false, message: 'Error updating category', error: error.message });
+  }
+};

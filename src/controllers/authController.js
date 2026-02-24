@@ -7,6 +7,7 @@ const { createLog } = require('../services/logging');
 const { Seller, Media, Review, Order } = require('../models');
 const { BADGE_LABELS, BADGE_COLORS, LANGUAGE_LABELS } = require('../utils/constants');
 const { sendEmail } = require('./emailTemplate');
+const upload = require('../middleware/multer');
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -183,6 +184,43 @@ exports.verifyOtp = async (req, res) => {
   }
 };  
 
+exports.buyerImageUpload = (req, res) => {
+  upload.single('image')(req, res, async (err) => {
+    try {
+      // Multer error handling
+      if (err) {
+        return res.status(400).json({ message: err.message });
+      }
+
+      const { email } = req.body;
+
+      if (!email) {
+        return res.status(400).json({ message: 'Email is required' });
+      }
+
+      const user = await Buyer.findOne({ email });
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ message: 'No image file provided' });
+      }
+      user.image = `/uploads/${req.file.filename}`;
+      await user.save();
+
+      return res.status(200).json({
+        message: 'Image uploaded successfully',
+        image: user.image,
+      });
+
+    } catch (error) {
+      console.error('Upload error:', error);
+      return res.status(500).json({ message: 'Server error' });
+    }
+  });
+};
+
 exports.signin = [ async (req, res) => {
   
   try {
@@ -254,7 +292,9 @@ exports.validateToken = async (req, res) => {
 
 exports.getProfile = async (req, res) => {
   try {
-    const user = await Buyer.findById(req.user).select('-password');
+    const email = req.query.email;
+    console.log('Fetching profile for user ID:', email);
+    const user = await Buyer.findOne({email}).select('-password');
     if (!user) {
       return res.status(404).json({ message: 'Buyer not found.' });
     }
@@ -264,6 +304,21 @@ exports.getProfile = async (req, res) => {
     res.status(500).json({ message: 'Server error.' });
   }
 };
+
+exports.updateProfile = async (req, res) => {
+  try {
+    const email = req.body.email;
+    console.log('Updating profile for user ID:', email);
+    const user = await Buyer.findOneAndUpdate({email}, req.body, { new: true });
+    if (!user) {
+      return res.status(404).json({ message: 'Buyer not found.' });
+    }
+    res.status(200).json({ user });
+  } catch (error) {
+    console.error('Update profile error:', error.message, error.stack);
+    res.status(500).json({ message: 'Server error.' });
+  }
+};  
 
 exports.googleAuth = async (req, res) => {
   try {

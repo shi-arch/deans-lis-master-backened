@@ -292,5 +292,24 @@ router.get(
   jobController.getJobs
 );
 
+router.post(
+  "/create-order",
+  authMiddlewareBuyer,
+  jobController.createOrder
+);
+
+router.post(
+  "/update-order",
+  authMiddlewareBuyer,
+  jobController.updateOrder
+);
+
+
+router.get(
+  "/get-orders",
+  authMiddlewareBuyer,
+  jobController.getOrdersForBuyer
+);
+
 
 module.exports = router;

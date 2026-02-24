@@ -10,21 +10,22 @@ const enquiryRoutes = require("./routes/enquiryRoutes");
 const savedTalent = require("./routes/savedTalent");
 const proposalRoutes = require("./routes/proposalRoutes");
 const messageRoutes = require("./routes/messageRoutes");
+const paymentRoutes = require("./routes/paymentRoutes");
 const path = require('path');
 const http = require("http");
 const { Server } = require("socket.io");
 const { getReceiverSocketId, setupSocket } = require("./socket/socket");
 
-
+console.log(process.env.MONGO_URI,'uuuuu')
 // const router = express.Router();
 // router.use(express.urlencoded({ extended: true }));
 
-// dotenv.config();
-const env = 'development';
-dotenv.config({ path: path.resolve(__dirname, `../.env.${env}`) });
+dotenv.config();
+// const env = 'development';
+// dotenv.config({ path: path.resolve(__dirname, `../.env.${env}`) });
 
-console.log(`Running in ${env} mode`);
-console.log(`Mongo URI: ${process.env.MONGO_URI}`);
+//console.log(`Running in ${env} mode>>>>>>>>>>>>>`);
+console.log(`Mongo URIkkkkkkkkkkkkkkkkkkk: ${process.env.MONGO_URI}`);
 
 const app = express();
 const server = http.createServer(app);
@@ -81,18 +82,19 @@ app.get("/api/status", (req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
-
+app.use("/api/jobs", jobRoutes);
 app.use("/api/auth", authRoutes);
-app.use("/api/sellers", sellerRoutes);
-app.use("/api/jobs", jobRoutes);  //THis should be above the express.json
+app.use("/api/sellers", sellerRoutes);  //THis should be above the express.json
 app.use("/api/enquiries", enquiryRoutes);
 app.use("/api/proposals", proposalRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/payments", paymentRoutes);
 
 
 
 mongoose
-  .connect('mongodb://mongo-development:27017/signup_db', {
+  //.connect('mongodb://mongo:27017/signup_db', {
+  .connect('mongodb://localhost:27017/signup_db', {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
@@ -100,4 +102,4 @@ mongoose
   .catch((err) => console.error("MongoDB connection error:", err));
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
