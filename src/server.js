@@ -90,10 +90,7 @@ app.use("/api/payments", paymentRoutes);
 
 mongoose
   //.connect('mongodb://mongo:27017/signup_db', {
-  .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
