@@ -16,10 +16,6 @@ const http = require("http");
 const { Server } = require("socket.io");
 const { getReceiverSocketId, setupSocket } = require("./socket/socket");
 
-console.log(process.env.MONGO_URI,'uuuuu')
-// const router = express.Router();
-// router.use(express.urlencoded({ extended: true }));
-
 dotenv.config();
 // const env = 'development';
 // dotenv.config({ path: path.resolve(__dirname, `../.env.${env}`) });
