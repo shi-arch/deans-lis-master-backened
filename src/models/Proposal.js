@@ -11,7 +11,7 @@ const proposalSchema = new mongoose.Schema({
   },
   sellerId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User', // Changed to 'User' assuming a single User model
+    ref: 'Seller', // Changed to 'User' assuming a single User model
     required: [true, 'Seller ID is required'],
   },
   offerPrice: {
@@ -59,6 +59,13 @@ const proposalSchema = new mongoose.Schema({
     default: 'submitted',
     required: [true, 'Status is required'],
   },
+  buyerDecision: {
+    type: String,
+    enum: {
+      values: ['shortlisted', 'maybe', 'no-interest'],
+      message: '{VALUE} is not a valid decision',
+    }
+  }
 }, {
   timestamps: true,
 });

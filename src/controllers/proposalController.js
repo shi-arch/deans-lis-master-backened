@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Proposal = require('../models/Proposal');
 const JobPost = require('../models/Job');
 const { validationResult } = require('express-validator');
-const { getGenreIdByName, getGenreNameById, getLanguageIdByName, getLanguageNameById } = require('../utils/constants');
+const { getGenreIdByName, getGenreNameById, getLanguageIdByName, getLanguageNameById, getCategoryNameById } = require('../utils/constants');
 const fs = require('fs').promises;
 const path = require('path');
 
@@ -15,7 +15,7 @@ exports.submitProposal = async (req, res) => {
     }
 
     const { jobId, price, coverLetter, categories, genres, languages } = req.body;
-    const sellerId = req.user.userId;
+    const sellerId = req.user.userId; 
 
     // Check for existing proposal
     const existingProposal = await Proposal.findOne({ jobId, sellerId });
@@ -30,9 +30,9 @@ exports.submitProposal = async (req, res) => {
     }
 
     // Parse arrays
-    const categoriesArray = categories ? categories.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id)) : [];
-    const genresArray = genres ? genres.split(',').map(name => getGenreIdByName(name.trim())).filter(id => id) : [];
-    const languagesArray = languages ? languages.split(',').map(name => getLanguageIdByName(name.trim())).filter(id => id) : [];
+    const categoriesArray = categories ? categories.split(',') : [];
+    const genresArray = genres ? genres.split(',') : [];
+    const languagesArray = languages ? languages.split(',') : [];
 
     // Process attachments
     const newAttachments = req.files ? req.files.map(file => ({
@@ -74,8 +74,8 @@ exports.updateProposal = async (req, res) => {
     }
 
     const proposalId = req.params.id;
-    const sellerId = req.user.userId;
-    const { price, coverLetter, categories, genres, languages, existingAttachments, deletedAttachments } = req.body;
+    const sellerId = req.user && req.user.userId || req.body.sellerId; // Allow sellerId from body for testing purposes
+    const { price, coverLetter, categories, genres, languages, existingAttachments, deletedAttachments, buyerDecision } = req.body;
 
     // Validate proposal exists and belongs to seller
     const proposal = await Proposal.findOne({ _id: proposalId, sellerId }).populate('jobId', 'title description price');
@@ -89,9 +89,9 @@ exports.updateProposal = async (req, res) => {
     }
 
     // Parse arrays
-    const categoriesArray = categories ? categories.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id)) : proposal.categories;
-    const genresArray = genres ? genres.split(',').map(name => getGenreIdByName(name.trim())).filter(id => id) : proposal.genres;
-    const languagesArray = languages ? languages.split(',').map(name => getLanguageIdByName(name.trim())).filter(id => id) : proposal.languages;
+    const categoriesArray = categories ? categories.split(',') : proposal.categories;
+    const genresArray = genres ? genres.split(',') : proposal.genres;
+    const languagesArray = languages ? languages.split(',') : proposal.languages;
 
     // Parse existing and deleted attachments
     let existingAttachmentsArray = proposal.attachments;
@@ -159,6 +159,7 @@ exports.updateProposal = async (req, res) => {
 
     // Update proposal
     const updateData = {
+      ...(buyerDecision ? { buyerDecision: buyerDecision } : {buyerDecision: null}),
       ...(price && { offerPrice: parseFloat(price) }),
       ...(coverLetter && { coverLetter }),
       ...(categories && { categories: categoriesArray }),
@@ -278,6 +279,7 @@ exports.getProposalsForJob = async (req, res) => {
     const proposals = await Proposal.find({ jobId }).populate('sellerId', 'username email');
     const proposalData = proposals.map(proposal => ({
       id: proposal._id,
+      buyerDecision: proposal.buyerDecision,
       sellerId: proposal.sellerId._id,
       sellerName: proposal.sellerId.username,
       sellerEmail: proposal.sellerId.email,
@@ -285,7 +287,7 @@ exports.getProposalsForJob = async (req, res) => {
       coverLetter: proposal.coverLetter,
       categories: proposal.categories.map(id => ({
         id,
-        name: id, // Frontend handles mapping
+        name: getCategoryNameById(id) || 'Unknown', // Frontend handles mapping
       })),
       genres: proposal.genres.map(id => ({
         id,

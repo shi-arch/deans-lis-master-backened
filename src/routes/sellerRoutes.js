@@ -120,7 +120,7 @@ router.get('/web_categories/categories', categoryController.getCategoriesWithSub
 router.post('/:sellerId/favorite', authMiddlewareBuyer, userActionsController.toggleFavorite);
 
 // GET route to retrieve all sellers
-router.get('/', sellerController.getSellers);
+router.get('/', authMiddlewareBuyer, sellerController.getSellers);
 
 // GET route to retrieve a specific seller by ID
 router.get('/:id', sellerController.getSellerById);

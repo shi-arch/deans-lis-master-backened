@@ -24,6 +24,7 @@ const {
 } = require('../utils/constants');
 const sanitizeHtml = require('sanitize-html'); //for joeditor
 const path = require("path");
+const Buyer = require('../models/Buyer');
 
 
 
@@ -460,7 +461,7 @@ exports.getSellers = async (req, res) => {
     // console.log('Subcategory map:', subcategoryMap);
 
     // Fetch buyer's savedTalents once for performance
-    const buyer = buyerId ? await buyer.findById(buyerId).select('savedTalents') : null;
+    const buyer = buyerId ? await Buyer.findById(buyerId.userId).select('savedTalents') : null;
     const savedTalents = buyer ? buyer.savedTalents.map(id => id.toString()) : [];
 
     // Build search filter

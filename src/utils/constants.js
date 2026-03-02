@@ -111,6 +111,7 @@ const BADGE_COLORS = BADGES.reduce((acc, badge) => ({ ...acc, [badge.id]: badge.
 const getLanguageNameById = id => LANGUAGES.find(lang => lang.id === id)?.name;
 const getLanguageIdByName = name => LANGUAGES.find(lang => lang.name === name)?.id;
 const getGenreNameById = id => GENRES.find(genre => genre.id === id)?.name;
+const getCategoryNameById = id => Categories.find(cat => cat.id === id)?.name;
 const getGenreIdByName = name => GENRES.find(genre => genre.name === name)?.id;
 const getGenderNameById = id => GENDERS.find(gender => gender.id === id)?.name;
 const getGenderIdByName = name => GENDERS.find(gender => gender.name === name)?.id;
@@ -138,5 +139,6 @@ module.exports = {
   getBadgeColorById,
   getStateNameById,   
   getStateIdByName,
+  getCategoryNameById,
   Categories,
 };

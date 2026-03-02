@@ -187,11 +187,11 @@ exports.post = async (req, res) => {
     // Process new attachments
     const newAttachments = req.files
       ? req.files.map(file => ({
-          name: file.originalname,
-          url: `/Uploads/${file.filename}`, // Ensure this path is accessible
-          type: file.mimetype,
-          size: file.size,
-        }))
+        name: file.originalname,
+        url: `/Uploads/${file.filename}`, // Ensure this path is accessible
+        type: file.mimetype,
+        size: file.size,
+      }))
       : [];
 
     // Filter out deleted attachments and combine with new ones
@@ -425,11 +425,11 @@ exports.saveDraft = async (req, res) => {
     // Process new attachments
     const newAttachments = req.files
       ? req.files.map(file => ({
-          name: file.originalname,
-          url: `/Uploads/${file.filename}`,
-          type: file.mimetype,
-          size: file.size,
-        }))
+        name: file.originalname,
+        url: `/Uploads/${file.filename}`,
+        type: file.mimetype,
+        size: file.size,
+      }))
       : [];
 
     // Filter out deleted attachments and combine with new ones
@@ -470,21 +470,21 @@ exports.saveDraft = async (req, res) => {
       zipCode: zipCode || '',
       location: parsedLocation
         ? {
-            name: parsedLocation.name,
-            address: parsedLocation.address,
-            coordinates: {
-              type: 'Point',
-              coordinates: parsedLocation.coordinates,
-            },
-          }
-        : {
-            name: 'TBD',
-            address: 'TBD',
-            coordinates: {
-              type: 'Point',
-              coordinates: [0, 0],
-            },
+          name: parsedLocation.name,
+          address: parsedLocation.address,
+          coordinates: {
+            type: 'Point',
+            coordinates: parsedLocation.coordinates,
           },
+        }
+        : {
+          name: 'TBD',
+          address: 'TBD',
+          coordinates: {
+            type: 'Point',
+            coordinates: [0, 0],
+          },
+        },
       range: rangeValue,
       categories: categoriesArray,
       genres: genresArray,
@@ -528,7 +528,7 @@ exports.saveDraft = async (req, res) => {
 // exports.getById = async (req, res) => {
 //   try {
 //     const jobId = req.params.id;
-    
+
 //     // Validate ObjectId format
 //     if (!mongoose.Types.ObjectId.isValid(jobId)) {
 //       return res.status(400).json({ 
@@ -646,18 +646,18 @@ exports.getById = async (req, res) => {
 
     const jobId = req.params.id;
     if (!mongoose.Types.ObjectId.isValid(jobId)) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Invalid job ID format' 
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid job ID format'
       });
     }
 
     // Populate buyerId to get buyer details
     const job = await JobPost.findById(jobId).populate('buyerId', 'firstName lastName city zipCode');
     if (!job) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Job post not found' 
+      return res.status(404).json({
+        success: false,
+        message: 'Job post not found'
       });
     }
 
@@ -722,10 +722,10 @@ exports.getById = async (req, res) => {
     res.status(200).json({ success: true, data: jobData });
   } catch (error) {
     console.error('Error fetching job post:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Server error while fetching job details', 
-      error: error.message 
+    res.status(500).json({
+      success: false,
+      message: 'Server error while fetching job details',
+      error: error.message
     });
   }
 };
@@ -733,33 +733,41 @@ exports.getById = async (req, res) => {
 exports.createOrder = async (req, res) => {
   try {
     const buyerId = req.user.userId; // From authMiddlewareBuyer
-    const {jobId, applicationId, sellerId, amount, paymentStatus, date, time, location, coordinates, status} = req.body
+    const { jobId, applicationId, sellerId, amount, paymentStatus, date, time, location, coordinates, status } = req.body
     if (!sellerId || !amount || !date || !time || !location || !coordinates || !status) {
       return res.status(400).json({
         success: false,
         message: 'Missing required fields: jobId, applicationId, buyerId, sellerId, amount',
       });
     }
-     const validObjectId = (id) =>
+    const eventTime = new Date(date);
+    const hours = eventTime.getHours();
+    const minutes = eventTime.getMinutes();
+    const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes
+      .toString()
+      .padStart(2, "0")}`;
+    console.log(formattedTime);
+    const validObjectId = (id) =>
       id && mongoose.Types.ObjectId.isValid(id)
         ? new mongoose.Types.ObjectId(id)
         : undefined;
-    const newOrder = await Order.create({
+    const obj = {
       orderId: Math.random().toString(36).substr(2, 9), // Generate a random order ID
       jobId: validObjectId(jobId) || "",
       applicationId: validObjectId(applicationId) || "",
       buyerId: new mongoose.Types.ObjectId(buyerId),
       sellerId: new mongoose.Types.ObjectId(sellerId),
-      payment: {amount, status: paymentStatus || "Pending"},
+      payment: { amount, status: paymentStatus || "Pending" },
       schedule: {
         date: new Date(date),
-        time: new Date(time),
+        time: formattedTime,
         location: location || "Bangalore, MG Road",
         coordinates: coordinates
       },
       status: status,
       timeRemaining: "2 days"
-    });
+    }
+    const newOrder = await Order.create(obj);
     newOrder.save()
     res.status(201).json({
       success: true,
@@ -778,8 +786,8 @@ exports.createOrder = async (req, res) => {
 
 exports.updateOrder = async (req, res) => {
   try {
-    const {updateData, orderId} = req.body;
-    const updatedOrder = await Order.findOneAndUpdate({ _id: orderId }, {...updateData}, { new: true });
+    const { updateData, orderId } = req.body;
+    const updatedOrder = await Order.findOneAndUpdate({ _id: orderId }, { ...updateData }, { new: true });
     if (!updatedOrder) {
       return res.status(404).json({ success: false, message: 'Order not found' });
     }
@@ -1118,7 +1126,7 @@ exports.getJobs = async (req, res) => {
     const availabilityDate = req.query.availability_date || '';
     const state = req.query.state || '';
     const searchQuery = req.query.search || '';
-     
+
 
     // Determine user type and route
     const isBuyer = req.user && req.originalUrl.includes('/my-jobs');
@@ -1302,7 +1310,7 @@ exports.getJobs = async (req, res) => {
         }
       }
 
-      
+
 
       totalJobs = await JobPost.countDocuments(query);
       hasMore = page * limit < totalJobs;
@@ -1310,7 +1318,7 @@ exports.getJobs = async (req, res) => {
       jobs = await JobPost.find(query)
         .sort(sort)
         .skip(skip)
-        .limit(limit);  
+        .limit(limit);
     }
     // ============================
     // Case 3: Public Website (no login)
@@ -1588,53 +1596,53 @@ exports.updateJob = async (req, res) => {
     }
 
     // Parse existing attachments
-      let existingAttachmentsArray = job.attachments; // Default to current attachments
-      if (existingAttachments && existingAttachments.trim() !== '') {
-        try {
-          existingAttachmentsArray = JSON.parse(existingAttachments);
-          if (!Array.isArray(existingAttachmentsArray)) {
-            throw new Error('Existing attachments must be an array');
-          }
-          console.log('Parsed existingAttachments:', existingAttachmentsArray);
-        } catch (error) {
-          console.error('Existing attachments parsing error:', error);
-          return res.status(400).json({
-            success: false,
-            message: 'Invalid existing attachments format',
-          });
+    let existingAttachmentsArray = job.attachments; // Default to current attachments
+    if (existingAttachments && existingAttachments.trim() !== '') {
+      try {
+        existingAttachmentsArray = JSON.parse(existingAttachments);
+        if (!Array.isArray(existingAttachmentsArray)) {
+          throw new Error('Existing attachments must be an array');
         }
-      } else {
-        console.log('No existingAttachments provided, using job.attachments:', job.attachments);
+        console.log('Parsed existingAttachments:', existingAttachmentsArray);
+      } catch (error) {
+        console.error('Existing attachments parsing error:', error);
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid existing attachments format',
+        });
       }
+    } else {
+      console.log('No existingAttachments provided, using job.attachments:', job.attachments);
+    }
 
     // Parse deleted attachments
-      let deletedAttachmentsArray = [];
-      if (deletedAttachments && deletedAttachments.trim() !== '') {
-        try {
-          deletedAttachmentsArray = JSON.parse(deletedAttachments);
-          if (!Array.isArray(deletedAttachmentsArray)) {
-            throw new Error('Deleted attachments must be an array');
-          }
-          console.log('Parsed deletedAttachments:', deletedAttachmentsArray);
-        } catch (error) {
-          console.error('Deleted attachments parsing error:', error);
-          return res.status(400).json({
-            success: false,
-            message: 'Invalid deleted attachments format',
-          });
+    let deletedAttachmentsArray = [];
+    if (deletedAttachments && deletedAttachments.trim() !== '') {
+      try {
+        deletedAttachmentsArray = JSON.parse(deletedAttachments);
+        if (!Array.isArray(deletedAttachmentsArray)) {
+          throw new Error('Deleted attachments must be an array');
         }
+        console.log('Parsed deletedAttachments:', deletedAttachmentsArray);
+      } catch (error) {
+        console.error('Deleted attachments parsing error:', error);
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid deleted attachments format',
+        });
       }
+    }
 
     // Process new attachments
     const newAttachments = req.files
       ? req.files.map(file => ({
-          name: file.originalname,
-          url: `/Uploads/${file.filename}`,
-          type: file.mimetype,
-          size: file.size,
-        }))
+        name: file.originalname,
+        url: `/Uploads/${file.filename}`,
+        type: file.mimetype,
+        size: file.size,
+      }))
       : [];
-      console.log('New attachments:', newAttachments);
+    console.log('New attachments:', newAttachments);
 
     // Determine final attachments
     // Compute final attachments
@@ -1671,39 +1679,39 @@ exports.updateJob = async (req, res) => {
       });
     }
 
-      // Update job with only provided fields
-      const updateData = {
-        ...(title && { title }),
-        ...(description && { description }),
-        ...(duration && { duration }),
-        ...(price && { price: numericPrice }),
-        ...(typeof isNegotiable !== 'undefined' && { isNegotiable: isNegotiable === 'true' }),
-        ...(date && { date: jobDate }),
-        ...(time && { time: jobTime }),
-        ...(state && { state: stateIndex }),
-        ...(city && { city }),
-        ...(zipCode && { zipCode }),
-        ...(location && {
-          location: {
-            name: parsedLocation.name,
-            address: parsedLocation.address,
-            coordinates: {
-              type: 'Point',
-              coordinates: parsedLocation.coordinates,
-            },
+    // Update job with only provided fields
+    const updateData = {
+      ...(title && { title }),
+      ...(description && { description }),
+      ...(duration && { duration }),
+      ...(price && { price: numericPrice }),
+      ...(typeof isNegotiable !== 'undefined' && { isNegotiable: isNegotiable === 'true' }),
+      ...(date && { date: jobDate }),
+      ...(time && { time: jobTime }),
+      ...(state && { state: stateIndex }),
+      ...(city && { city }),
+      ...(zipCode && { zipCode }),
+      ...(location && {
+        location: {
+          name: parsedLocation.name,
+          address: parsedLocation.address,
+          coordinates: {
+            type: 'Point',
+            coordinates: parsedLocation.coordinates,
           },
-        }),
-        ...(range && { range: rangeValue }),
-        ...(categories && { categories: categoriesArray }),
-        ...(genres && { genres: genresArray }),
-        ...(languages && { languages: languagesArray }),
-        ...(gender && { gender: genderArray }),
-        ...((existingAttachments || deletedAttachmentsArray.length > 0 || newAttachments.length > 0) && {
-          attachments: finalAttachments,
-        }),
-        ...(status && { status }),
-        updatedAt: new Date(),
-      };
+        },
+      }),
+      ...(range && { range: rangeValue }),
+      ...(categories && { categories: categoriesArray }),
+      ...(genres && { genres: genresArray }),
+      ...(languages && { languages: languagesArray }),
+      ...(gender && { gender: genderArray }),
+      ...((existingAttachments || deletedAttachmentsArray.length > 0 || newAttachments.length > 0) && {
+        attachments: finalAttachments,
+      }),
+      ...(status && { status }),
+      updatedAt: new Date(),
+    };
 
     // Update job
     const updatedJob = await JobPost.findByIdAndUpdate(

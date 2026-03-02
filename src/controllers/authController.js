@@ -11,7 +11,7 @@ const upload = require('../middleware/multer');
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-exports.signup = [ async (req, res) => {
+exports.signup = [async (req, res) => {
   try {
     let { firstName, lastName, username, email, phoneNumber, city, zipCode, password, confirmPassword, agreedToTerms, rememberMe } = req.body;
     console.log('Received signup data:', { firstName, lastName, username, email, phoneNumber, city, zipCode, agreedToTerms, rememberMe });
@@ -100,7 +100,7 @@ exports.signup = [ async (req, res) => {
     if (!agreedToTerms) {
       return res.status(400).json({ message: 'You must agree to the Terms of Service.' });
     }
-     
+
 
 
     // 12. Check for existing user
@@ -135,7 +135,7 @@ exports.signup = [ async (req, res) => {
     console.log('Buyer saved successfully:', { userId: user._id });
 
     // 15. Set logging data
-      // req.user = user._id;
+    // req.user = user._id;
 
     await createLog('Buyer', user._id, user._id, 'Buyer', 'Signup completed successfully');
     await createLog('Buyer', user._id, user._id, 'Buyer', user);
@@ -174,7 +174,7 @@ exports.verifyOtp = async (req, res) => {
         console.log('Generating JWT with expiresIn:', expiresIn);
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn });
         res.json({ token });
-      }      
+      }
     } else {
       res.status(400).json({ message: 'Email and OTP are required' });
     }
@@ -182,7 +182,7 @@ exports.verifyOtp = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
   }
-};  
+};
 
 exports.buyerImageUpload = (req, res) => {
   upload.single('image')(req, res, async (err) => {
@@ -221,11 +221,10 @@ exports.buyerImageUpload = (req, res) => {
   });
 };
 
-exports.signin = [ async (req, res) => {
-  
+exports.signin = [async (req, res) => {
+
   try {
-    const { email, password, rememberMe } = req.body;
-    console.log(req.body,'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+    const { email, password, rememberMe, userType } = req.body;
     console.log('Signin attempt:', { email, rememberMe });
 
     // 1. Validate inputs
@@ -234,9 +233,9 @@ exports.signin = [ async (req, res) => {
     }
 
     // 2. Find user
-    const user = await Buyer.findOne({ email });
+    const user = userType === 'seller' ? await Seller.findOne({ email }) : await Buyer.findOne({ email });
     if (!user) {
-      console.log('Signin: Buyer not found:', email);
+      console.log('Signin: User not found:', email);
       return res.status(401).json({ message: 'Invalid email or password.' });
     }
 
@@ -270,6 +269,48 @@ exports.signin = [ async (req, res) => {
 }
 ];
 
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email, type } = req.body;
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+    const user = await Buyer.findOne({ email: email.toLowerCase().trim() });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    if (type == 'email') {
+      const otp = await sendEmail(user.firstName + ' ' + user.lastName, email);
+      user.otp = otp;
+      await user.save();
+      res.status(200).json({ message: 'OTP sent successfully' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+    const user = await Buyer.findOne({ email: email.toLowerCase().trim() });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    if (user.otp !== otp) {
+      return res.status(400).json({ message: 'Invalid OTP' });
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+    res.status(200).json({ message: 'Password reset successful' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 exports.validateToken = async (req, res) => {
   try {
     const token = req.headers.authorization?.split('Bearer ')[1];
@@ -295,7 +336,7 @@ exports.getProfile = async (req, res) => {
   try {
     const email = req.query.email;
     console.log('Fetching profile for user ID:', email);
-    const user = await Buyer.findOne({email}).select('-password');
+    const user = await Buyer.findOne({ email }).select('-password');
     if (!user) {
       return res.status(404).json({ message: 'Buyer not found.' });
     }
@@ -310,7 +351,7 @@ exports.updateProfile = async (req, res) => {
   try {
     const email = req.body.email;
     console.log('Updating profile for user ID:', email);
-    const user = await Buyer.findOneAndUpdate({email}, req.body, { new: true });
+    const user = await Buyer.findOneAndUpdate({ email }, req.body, { new: true });
     if (!user) {
       return res.status(404).json({ message: 'Buyer not found.' });
     }
@@ -319,7 +360,7 @@ exports.updateProfile = async (req, res) => {
     console.error('Update profile error:', error.message, error.stack);
     res.status(500).json({ message: 'Server error.' });
   }
-};  
+};
 
 exports.googleAuth = async (req, res) => {
   try {

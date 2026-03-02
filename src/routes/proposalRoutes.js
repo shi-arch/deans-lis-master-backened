@@ -123,7 +123,7 @@ router.post(
 
 router.patch(
   '/:id',
-  authMiddlewareSeller,
+  //authMiddlewareSeller,
   conditionalMulter,
   validateProposalUpdate,
   proposalController.updateProposal
@@ -143,7 +143,7 @@ router.get(
   proposalController.getProposalsForJob
 );
 
-router.patch(
+router.patch( 
   '/:id/status',
   authMiddlewareBuyer,
   validateProposalStatus,

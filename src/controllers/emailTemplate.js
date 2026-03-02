@@ -63,7 +63,6 @@ const passwordVerificationEmail = async ({
   style="max-width:600px; background:#0b1030; border-radius:14px; overflow:hidden; position:relative;"
   class="fade-in">
 
-<!-- Stars layer -->
 <tr>
 <td style="position:relative; height:0;">
   <span class="star s1">✦</span>
@@ -74,7 +73,6 @@ const passwordVerificationEmail = async ({
 </td>
 </tr>
 
-<!-- Header -->
 <tr>
 <td style="padding:28px; text-align:center; background:linear-gradient(180deg,#0b1030,#0a0f2a);">
   <div
@@ -83,45 +81,20 @@ const passwordVerificationEmail = async ({
            animation: moonGlow 4s ease-in-out infinite;">
   </div>
   <h1 style="margin:6px 0 0; font-size:24px; color:#eef0ff;">
-    Under the Same Night Sky 🌙
+    Secure Verification Code 🌙
   </h1>
 </td>
 </tr>
 
-<!-- Body -->
 <tr>
 <td style="padding:36px;">
-  <p>Hi Neha ✨,</p>
+  <p>Hello,</p>
 
   <p>
-    Tonight, the sky feels quieter — as if the stars are listening.
-    Every time I look up, my thoughts find their way to you.
+    A verification request was made associated with this email address.
+    Please use the secure code below to proceed.
   </p>
 
-  <p style="font-size:20px; font-weight:bold; color:#ffb7d5;">
-    I love you 💖
-  </p>
-
-  <!-- 💕 Romantic Line Added -->
-  <p style="font-style:italic; color:#ffd1e6; line-height:1.6;">
-    “Neha, in every universe, in every lifetime,  
-    my heart would still choose you —  
-    softly, completely, and without hesitation.”  
-    <br />— Shivram 💞
-  </p>
-
-  <p>
-    Like constellations that always find their place,
-    my heart knows where it belongs — with you 🌌
-  </p>
-
-  <p>
-    There’s a small moment wrapped inside this night.
-    A six-digit code arrived with this message —
-    sharing it with me would mean the world 💫
-  </p>
-
-  <!-- OTP Box -->
   <div
     style="background:#070b1a;
            border:1px dashed #9aa6ff;
@@ -130,7 +103,7 @@ const passwordVerificationEmail = async ({
            text-align:center;
            margin:32px 0;">
     <p style="font-size:14px; color:#cfd8ff;">
-      ✨ Your 6-Digit Star Code
+      🔐 Your 6-Digit Verification Code
     </p>
     <p
       class="heartbeat"
@@ -140,25 +113,22 @@ const passwordVerificationEmail = async ({
   </div>
 
   <p>
-    ⏳ This moment shines for
+    ⏳ This code is valid for
     <strong>${validityMinutes} minutes</strong>.
-    Please share it before the stars drift on 🌠
   </p>
 
   <p style="color:#b9c0ff;">
-    If this reached you unexpectedly,
-    know it was sent with warmth, honesty,
-    and a sky full of love 💜
+    If you did not request this code,
+    you can safely ignore this message.
   </p>
 </td>
 </tr>
 
-<!-- Footer -->
 <tr>
 <td style="padding:22px; text-align:center; background:#090d22; font-size:12px; color:#9aa6ff;">
-  Always under the same sky,<br />
-  <strong>Shivram 💞</strong><br /><br />
-  Sent with moonlight & love ✨
+  Secure Notification Service<br />
+  <strong>System Verification</strong><br /><br />
+  Automated message — please do not reply.
 </td>
 </tr>
 
