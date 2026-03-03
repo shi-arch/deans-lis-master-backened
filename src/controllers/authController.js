@@ -206,12 +206,12 @@ exports.buyerImageUpload = (req, res) => {
       if (!req.file) {
         return res.status(400).json({ message: 'No image file provided' });
       }
-      user.image = `/uploads/${req.file.filename}`;
+      user.image = req.file.path;
       await user.save();
 
       return res.status(200).json({
         message: 'Image uploaded successfully',
-        image: user.image,
+        image: req.file.path,
       });
 
     } catch (error) {

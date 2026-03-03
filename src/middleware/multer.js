@@ -1,15 +1,31 @@
 const multer = require("multer");
 const path = require("path");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
-// Configure file storage for message attachments
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "public/uploads");
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
+const cloudinary = require("cloudinary").v2;
+//CLOUDINARY_URL=cloudinary://213157445611876:Cxw9BRgPYXWos3vw79fs16MeV4E@dojecevfr
+cloudinary.config({
+  cloud_name: "dojecevfr",
+  api_key: "213157445611876",
+  api_secret: "Cxw9BRgPYXWos3vw79fs16MeV4E"
+});
+
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "uploads",
+    allowed_formats: ["jpg", "png", "jpeg"],
   },
 });
+// Configure file storage for message attachments
+// const storage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     cb(null, "public/uploads");
+//   },
+//   filename: (req, file, cb) => {
+//     cb(null, Date.now() + path.extname(file.originalname));
+//   },
+// });
 
 // Multer middleware for file uploads
 const upload = multer({
